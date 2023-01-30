@@ -46,9 +46,24 @@ This guide will help you create a workflow in your repository to demonstrate som
     This should trigger your workflow to run.
 6. In GitHub, navigate to your Actions, find your workflow, and drill in to view the logs.
     Can you find your name in the log output?
-    This is because the script in the workflow uses a built-in environment variable to detect who triggered the workflow.
-    Explore other pre-defined environment variables and define your own as needed to configure different actions and add context.
-7. Up to this point, you've just used GitHub Actions to execute some code inside their service.
+    This is because the script in the workflow uses a built-in _environment variable_ to detect who triggered the workflow.
+7. Just like when writing other code, variables help to limit where changes need to be made, and they help pass information between steps or jobs.
+    Environment variables in Actions can be defined at multiple levels.
+    Add the `env` property to the `info` job and modify the `run` command so that it looks like this:
+    ```yml
+    jobs:
+      info:
+        runs-on: ubuntu-22.04
+        env:
+          GREETING: My Special String
+        steps:
+          - run: echo "$GITHUB_ACTOR says $GREETING"
+    ```
+8. Now, commit the changes your `my-workflow.yml` file and push it to GitHub again.
+    Navigate to Actions and find the log output for this run.
+    Do you see your special string?
+    Explore other [pre-defined environment variables](https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables) and define your own as needed to configure different actions and add context.
+9. Up to this point, you've just used GitHub Actions to execute some code inside their service.
     More often, you need to check out your code repository onto the runner in order to do something with it.
     Add the following job after the `info` job in your workflow:
     ```yml
@@ -58,7 +73,7 @@ This guide will help you create a workflow in your repository to demonstrate som
           - uses: actions/checkout@v2
     ```
     The `checkout` action clones your repo on the GitHub runner.
-8. This job doesn't really do anything of value yet. Next, you need to ensure you have the right tooling and correct versions installed on the runner. Add this step to the `build` job in your workflow:
+10. This job doesn't really do anything of value yet. Next, you need to ensure you have the right tooling and correct versions installed on the runner. Add this step to the `build` job in your workflow:
     ```yml
           - uses: actions/setup-node@v2
             with:
@@ -66,18 +81,18 @@ This guide will help you create a workflow in your repository to demonstrate som
     ```
     For many languages, there is setup action available to install the version of the SDK that you need to build your code.
     Notice the `with` property in the Yaml. This is where you provide input parameters to actions. Any action that allows configuration of its behavior will require parameters to be set in the `with` property.
-9. Now, the workflow ensures that Node.js is installed so it can be used in the rest of that Job.
+11. Now, the workflow ensures that Node.js is installed so it can be used in the rest of that Job.
     Add the following steps to the `build` job to install dependencies and execute a build:
     ```yml
           - run: npm ci
           - run: npm run build
     ```
     If you're not familiar with Node.js and NPM, these commands just ensure that dependencies of this project are installed, and the `npm run build` command is triggers a custom script to build this project (a simple static website).
-10. Commit the changes to your `my-workflow.yml` file so far and push to GitHub.
+12. Commit the changes to your `my-workflow.yml` file so far and push to GitHub.
     In a few moments, you should be able to see a new run in your repository's Actions tab that performs the additional steps defined.
     Note on the workflow run page that the `info` and `build` jobs run in parallel. When you need to define dependencies between jobs, use the `needs` parameter in the job that depends on another.
     Troubleshoot any issues by looking at the logs and ensuring that the syntax of the workflow file is correct.
-11. Now that the project builds successfully, you need to store a copy of the built website so that it can be deployed (manually _or_ by another job or workflow). Add the following step to your `build` job:
+13. Now that the project builds successfully, you need to store a copy of the built website so that it can be deployed (manually _or_ by another job or workflow). Add the following step to your `build` job:
     ```yml
           - uses: actions/upload-artifact@v1
             with:
@@ -87,7 +102,7 @@ This guide will help you create a workflow in your repository to demonstrate som
     Note again the use of the `uses` and `with` properties to invoke a public GitHub Action and provide parameters to it.
     In this case, `name` defines the name of the artifact you are saving, and `path` defines where GitHub should find the artifact on the runner.
     This is evaluated relative to the project root.
-12. Commit this final change to your `my-workflow.yml` files and push it to your GitHub repository.
+14. Commit this final change to your `my-workflow.yml` files and push it to your GitHub repository.
     On the next run of your workflow, you should see that an artifact is created and made available at the bottom of the web page for the run.
     This can be downloaded and inspected, or used by another job or workflow to be deployed or added to an artifact repository or file share.
 
