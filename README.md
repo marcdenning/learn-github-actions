@@ -102,9 +102,29 @@ This guide will help you create a workflow in your repository to demonstrate som
     Note again the use of the `uses` and `with` properties to invoke a public GitHub Action and provide parameters to it.
     In this case, `name` defines the name of the artifact you are saving, and `path` defines where GitHub should find the artifact on the runner.
     This is evaluated relative to the project root.
-14. Commit this final change to your `my-workflow.yml` files and push it to your GitHub repository.
+14. Commit this change to your `my-workflow.yml` file and push it to your GitHub repository.
     On the next run of your workflow, you should see that an artifact is created and made available at the bottom of the web page for the run.
     This can be downloaded and inspected, or used by another job or workflow to be deployed or added to an artifact repository or file share.
+15. In addition to variables, GitHub Actions also allows you to securely store secrets and use them in your workflow.
+    Secrets are often used to hold tokens or API keys for deploying to remote environments.
+    Add a secret to your repository by navigating to Settings > Secrets and variables > Actions, then click "New repository secret".
+    Enter `ARTIFACT_NAME` for the name and `mywebsite` for the valu.
+    See [GitHub's documentation on secret names](https://docs.github.com/en/actions/security-guides/encrypted-secrets#naming-your-secrets) for all allowed characters.
+16. In your `my-workflow.yml` file, change the `upload-artifact` action `name` parameter to use the secret:
+    ```yml
+          - uses: actions/upload-artifact@v1
+            with:
+              name: ${{ secrets.ARTIFACT_NAME }}
+              path: _site
+    ```
+    Notice the syntax to access the secret is different.
+    This syntax is used for secrets and the _context_ which holds other information about the repository, user, commits, runner, and other details.
+    Secrets **must** be passed into an environment variable or `with` parameter in a workflow to be used.
+17. Commit the `my-workflow.yml` file and push it to your repository.
+    Check the latest workflow run, and when it is complete, note that the name of the generated artifact is now different.
+    Note that this example does expose the value of the secret which is not a best practice.
+    The value is exposed by the demo to help you confirm that it was used successfully.
+    _Always take care not to log secrets_.
 
 ## Next steps
 
